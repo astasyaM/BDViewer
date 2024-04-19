@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Npgsql;
 using System.Configuration;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Threading;
 
 using TextBox = System.Windows.Forms.TextBox;
 using Button = System.Windows.Forms.Button;
@@ -302,7 +297,10 @@ namespace BDViewer
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при создании таблицы: " + ex.Message);
+                if (tableName=="")
+                    MessageBox.Show("Ошибка при создании таблицы: введите название таблицы!");
+                else
+                    MessageBox.Show("Ошибка при создании таблицы: " + ex.Message);
             }
             
         }
@@ -385,6 +383,13 @@ namespace BDViewer
             }
         }
 
+        /// <summary>
+        /// Выгрузка данных из таблицы
+        /// </summary>
+        /// <param name="tableName">Название таблицы</param>
+        /// <param name="fieldNames">Список названий полей</param>
+        /// <param name="fieldTypes">Список типов полей</param>
+        /// <param name="primaryKeyFields">Ключевые поля</param>
         public void UploadTableInformation(string tableName, ref List<string> fieldNames, ref List<string> fieldTypes, ref HashSet<string> primaryKeyFields)
         {
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
@@ -444,7 +449,7 @@ namespace BDViewer
 
             // Если название таблицы было изменено, то формируем запрос за переименование таблицы
             if (tablesNames.SelectedItem.ToString() != newTableName)
-                queries.Add($"ALTER TABLE {tablesNames.SelectedItem.ToString()} RENAME TO {newTableName};");
+                queries.Add($"ALTER TABLE {tablesNames.SelectedItem} RENAME TO {newTableName};");
 
             string oldName = tablesNames.SelectedItem.ToString();
 
@@ -546,7 +551,6 @@ namespace BDViewer
                     MessageBox.Show("Ошибка при обновлении таблицы: " + ex.Message);
                     transaction.Rollback();
                 }
-
                 connection.Close();
             }
             Controls.Remove(saveEditBtn);
